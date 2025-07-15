@@ -1,0 +1,456 @@
+DROP TABLE Galaktyka
+DROP TABLE Planeta
+DROP TABLE Historia_dowodzenia
+DROP TABLE Jedi
+DROP TABLE Jedi_Misja
+DROP TABLE Klon
+DROP TABLE Klon_Legion
+DROP TABLE Legion_Misja
+DROP TABLE Lista_Padawanow
+DROP TABLE Misja
+
+
+CREATE TABLE Galaktyka (
+    id INT PRIMARY KEY,
+    nazwa NVARCHAR(21) NOT NULL
+);
+CREATE TABLE Planeta (
+    id INT PRIMARY KEY,
+    nazwa NVARCHAR(50) NOT NULL,
+    populacja INT NOT NULL,
+    Galaktyka_id INT NOT NULL,
+    FOREIGN KEY (Galaktyka_id) REFERENCES Galaktyka (id)
+);
+CREATE TABLE Klon_Legion (
+    id INT PRIMARY KEY,
+    nazwa NVARCHAR(50) NULL,
+    rodzaj NVARCHAR(21) NOT NULL
+);
+CREATE TABLE Klon (
+    id INT PRIMARY KEY,
+    pseudonim NVARCHAR(21) NULL,
+    czy_wybitny CHAR(1) NULL,
+    stopien_wojskowy NVARCHAR(21) NOT NULL,
+    Klon_Legion_id INT NOT NULL,
+    FOREIGN KEY (Klon_Legion_id) REFERENCES Klon_Legion (id)
+);
+
+
+CREATE TABLE Misja (
+    id INT PRIMARY KEY,
+    kryptonim NVARCHAR(50) NOT NULL,
+    planeta_id INT NOT NULL,
+    data_rozpoczecia DATE NOT NULL,
+    data_zakonczenia DATE NULL,
+    czy_zwyciestwo CHAR(1) NULL,
+    FOREIGN KEY (planeta_id) REFERENCES Planeta (id)
+);
+CREATE TABLE Legion_Misja (
+    Klon_Legion_id INT NOT NULL,
+    Straty_legionu INT NOT NULL,
+    Misja_id INT NOT NULL,
+    PRIMARY KEY (Klon_Legion_id, Misja_id),
+    FOREIGN KEY (Klon_Legion_id) REFERENCES Klon_Legion (id),
+    FOREIGN KEY (Misja_id) REFERENCES Misja (id)
+);
+
+CREATE TABLE Jedi (
+    imie NVARCHAR(50) PRIMARY KEY,
+    nazwisko NVARCHAR(21) NULL,
+    ranga NVARCHAR(21) NOT NULL,
+    rada CHAR(1) NULL
+);
+
+CREATE TABLE Historia_dowodzenia (
+    Klon_Legion_id INT NOT NULL,
+    Jedi_imie NVARCHAR(50) NOT NULL,
+    data_rozpoczecia DATE NOT NULL,
+    data_zakonczenia DATE NULL,
+    PRIMARY KEY (Klon_Legion_id, Jedi_imie, data_rozpoczecia),
+    FOREIGN KEY (Jedi_imie) REFERENCES Jedi (imie),
+    FOREIGN KEY (Klon_Legion_id) REFERENCES Klon_Legion (id)
+);
+
+
+
+
+
+CREATE TABLE Jedi_Misja (
+    Misja_id INT NOT NULL,
+    Jedi_imie NVARCHAR(50) NOT NULL,
+    PRIMARY KEY (Misja_id, Jedi_imie),
+    FOREIGN KEY (Jedi_imie) REFERENCES Jedi (imie),
+    FOREIGN KEY (Misja_id) REFERENCES Misja (id)
+);
+
+
+
+
+
+
+
+CREATE TABLE Lista_Padawanow (
+    Mistrz NVARCHAR(50) NOT NULL,
+    Padawan NVARCHAR(50) NOT NULL,
+    padawan_od DATE NOT NULL,
+    padawan_do DATE NOT NULL,
+    PRIMARY KEY (Mistrz, Padawan),
+    FOREIGN KEY (Padawan) REFERENCES Jedi (imie),
+    FOREIGN KEY (Mistrz) REFERENCES Jedi (imie)
+);
+
+
+
+
+
+
+ALTER TABLE Historia_dowodzenia ADD CONSTRAINT Historia_dowodzenia_Jedi
+    FOREIGN KEY (Jedi_imie)
+    REFERENCES Jedi (imie);
+
+ALTER TABLE Historia_dowodzenia ADD CONSTRAINT Historia_dowodzenia_klon
+    FOREIGN KEY (Klon_Legion_id)
+    REFERENCES Klon_Legion (id);
+
+
+ALTER TABLE Jedi_Misja ADD CONSTRAINT Jedi_Misja_Jedi
+    FOREIGN KEY (Jedi_imie)
+    REFERENCES Jedi (imie);
+
+
+ALTER TABLE Jedi_Misja ADD CONSTRAINT Jedi_Misja_Misja
+    FOREIGN KEY (Misja_id)
+    REFERENCES Misja (id);
+
+
+ALTER TABLE Klon ADD CONSTRAINT Klon_Klon_Legion
+    FOREIGN KEY (Klon_Legion_id)
+    REFERENCES Klon_Legion (id);
+
+
+ALTER TABLE Legion_Misja ADD CONSTRAINT Legion_Misja_Klon_Legion
+    FOREIGN KEY (Klon_Legion_id)
+    REFERENCES Klon_Legion (id);
+
+
+ALTER TABLE Legion_Misja ADD CONSTRAINT Legion_Misja_Misja
+    FOREIGN KEY (Misja_id)
+    REFERENCES Misja (id);
+
+
+ALTER TABLE Lista_Padawanow ADD CONSTRAINT Lista_Padawanow_Jedi
+    FOREIGN KEY (Padawan)
+    REFERENCES Jedi (imie);
+
+
+ALTER TABLE Lista_Padawanow ADD CONSTRAINT Lista_Padawanow_Jedi1
+    FOREIGN KEY (Mistrz)
+    REFERENCES Jedi (imie);
+
+
+ALTER TABLE Misja ADD CONSTRAINT Misja_Raport_Planeta
+    FOREIGN KEY (planeta_id)
+    REFERENCES Planeta (id);
+
+
+
+
+
+-- Jedi: Values
+INSERT INTO Jedi (imie, nazwisko, ranga, rada)
+VALUES
+  ('Yoda', null, 'Wielki mistrz jedi', 'T'),
+  ('Mace', 'Windu', 'Mistrz jedi', 'T'),
+  ('Obi-Wan', 'Kenobi', 'Mistrz jedi', 'T'),
+  ('Anakin', 'Skywalker', 'Rycerz jedi', 'T'),
+  ('Ki-Adi', 'Mundi', 'Mistrz jedi', 'T'),
+  ('Kit', 'Fisto', 'Mistrz jedi', 'T'),
+  ('Agen', 'Kolar', 'Mistrz jedi', 'T'),
+  ('Plo', 'Koon', 'Mistrz jedi', 'T'),
+  ('Shaak', 'Ti', 'Mistrz jedi', 'T'),
+  ('Seasee', 'Tiin', 'Mistrz jedi', 'T'),
+  ('Stass', 'Allie', 'Mistrz jedi', 'T'),
+  ('Yaddle', null, 'Mistrz jedi', 'T'),
+  ('Grogu', null, 'Mlodzik', 'N'),
+  ('Cal', 'Kestis', 'Padawan', 'N'),
+  ('Jaro', 'Tapal', 'Mistrz jedi', 'N'),
+  ('Cere', 'Junda', 'Rycerz jedi', 'N'),
+  ('Eeth', 'Koth', 'Rycerz jedi', 'N'),
+  ('Quinlan', 'Vos', 'Rycerz jedi', 'N'),
+  ('Luminara', 'Unduli', 'Mistrz jedi', 'N'),
+  ('Baris', 'Offe', 'Padawan', 'N'),
+  ('Adi', 'Galia', 'Rycerz jedi', 'N'),
+  ('Ahsoka', 'Tano', 'Padawan', 'N'),
+  ('Aayla', 'Secura', 'Rycerz jedi', 'N'),
+  ('Reva', 'Sevander', 'Mlodzik', 'N');
+
+-- Lista Padawanow: Values
+INSERT INTO Lista_Padawanow (mistrz, padawan, padawan_od, padawan_do)
+VALUES
+  ('Jaro', 'Cal', '2000-06-01', '2014-06-01'),
+  ('Anakin', 'Ahsoka', '1990-06-01', '2012-06-01'),
+  ('Luminara', 'Baris', '1990-06-05', '2012-08-01');
+
+-- Legiony Klonow
+INSERT INTO Klon_Legion (ID, NAZWA, RODZAJ)
+VALUES
+  (501, 'Pięść Vadera', 'Szturmowy'),
+  (212, null, 'Rozpoznawczy'),
+  (104, 'Wolfpack', 'Szturmowy'),
+  (99, 'Parszywa Zgraja', 'Rozpoznawczy'),
+  (41, 'Czterdziestka Jedynka', 'Rozpoznawczy'),
+  (327, null, 'Szturmowy'),
+  (187, null, 'Szturmowy');
+
+-- Klon
+INSERT INTO Klon (ID, PSEUDONIM, CZY_WYBITNY, STOPIEN_WOJSKOWY, Klon_Legion_ID)
+VALUES
+  (1, 'Cody', 'T', 'Komandor', 212),
+  (2, 'Waxer', 'T', 'Porucznik', 212),
+  (3, 'Boil', 'T', 'Porucznik', 212),
+  (4, null, 'N', 'Zolnierz', 212),
+  (5, null, 'N', 'Zolnierz', 212),
+  (6, null, 'N', 'Zolnierz', 212),
+  (7, 'Rex', 'T', 'Komandor', 501),
+  (8, 'Fives', 'T', 'ARC', 501),
+  (9, 'Jesse', 'T', 'Porucznik', 501),
+  (10, 'Tup', 'T', 'Zolnierz', 501),
+  (11, 'Dogma', 'N', 'Zolnierz', 501),
+  (12, 'Echo', 'T', 'ARC', 501),
+  (13, 'Kix', 'T', 'Medyk', 501),
+  (14, 'Hardcase', 'T', 'Zolnierz', 501),
+  (15, 'Appo', 'T', 'Porucznik', 501),
+  (16, 'Wolf', 'T', 'Komandor', 104),
+  (17, 'Sinker', 'T', 'Kapitan', 104),
+  (18, 'Comet', 'T', 'Zolnierz', 104),
+  (19, 'Boost', 'T', 'Zolnierz', 104),
+  (20, null, 'N', 'Zolnierz', 104),
+  (21, null, 'N', 'Zolnierz', 104),
+  (22, 'Hunter', 'T', 'Kapitan', 99),
+  (24, 'Tech', 'T', 'Kapitan', 99),
+  (25, 'Wrecker', 'T', 'Kapitan', 99),
+  (26, 'Crosshair', 'T', 'Kapitan', 99),
+  (27, 'Gree', 'T', 'Komandor', 41),
+  (28, 'Jag', 'T', 'Kapitan', 41),
+  (29, 'Scythe', 'N', 'Zolnierz', 41),
+  (30, null, 'N', 'Zolnierz', 41),
+  (31, 'Bly', 'T', 'Komandor', 327),
+  (32, 'Deviss', 'T', 'Komandor', 327),
+  (33, 'Tyto', 'T', 'Kapitan', 327),
+  (34, null, 'N', 'Zolnierz', 327),
+  (35, null, 'N', 'Zolnierz', 327),
+  (36, null, 'N', 'Zolnierz', 327),
+  (37, 'Maxun', 'T', 'Komandor', 187),
+  (38, 'Cull', 'T', 'Kapitan', 187),
+  (39, null, 'N', 'Zolnierz', 187),
+  (40, null, 'N', 'Zolnierz', 187),
+  (41, null, 'N', 'Zolnierz', 187),
+  (42, null, 'N', 'Zolnierz', 187);
+
+-- Historia Dowodzenia
+INSERT INTO Historia_dowodzenia (Klon_Legion_id, Jedi_imie, data_rozpoczecia, data_zakonczenia)
+VALUES
+  (212, 'Obi-Wan', '1990-05-13', null),
+  (99, 'Yoda', '1990-05-13', null),
+  (187, 'Mace', '1983-05-13', null),
+  (327,'Aayla','13-05-1987',null),
+  (104,'Plo','13-05-1990',null),
+(501,'Anakin','13-05-1990','13-05-2000'),
+(501,'Ahsoka','14-05-2000','15-05-2005'),
+(501,'Anakin','15-05-2005',null),
+(41,'Yoda','14-05-1990','15-05-2005'),
+(41,'Luminara','16-05-2005','15-05-2010'),
+(41,'Baris','16-05-2010','15-05-2016'),
+(41, 'Yoda', '1990-05-14', '2005-05-15');
+
+-- Misja
+INSERT INTO Misja (ID, KRYPTONIM, PLANETA_ID, DATA_ROZPOCZECIA, DATA_ZAKONCZENIA, CZY_ZWYCIESTWO)
+VALUES
+  (2, 'Cichy Kruk', 3, '1998-02-20', '1998-02-25', 'T'),
+  (3, 'Błyskawiczna Tarcza', 4, '1999-03-10', '1999-03-12', 'N'),
+  (4, 'Ognisty Anioł', 2, '2000-05-05', '2000-05-08', 'T'),
+  (5, 'Mroczny Łowca', 1, '2001-06-15', '2001-06-18', 'T'),
+  (6, 'Północna Błyskawica', 3, '2002-09-02', '2002-09-06', 'T'),
+  (7, 'Płomień', 2, '2003-11-12', '2003-11-15', 'N'),
+  (8, 'Mroczne Widmo', 3, '2004-06-20', '2004-06-25', 'T'),
+  (9, 'Ostatni dodatek kolekcji', 5, '2004-06-20', null, null);
+
+
+-- Planeta
+INSERT INTO Planeta (ID, NAZWA, POPULACJA, GALAKTYKA_ID)
+VALUES
+  (1, 'Geonosis', 37000000, 1),
+  (2, 'Mustafar', 55000000, 1),
+  (3, 'Felucia', 66000000, 1),
+  (4, 'Kamino', 100000000, 1),
+  (5, 'Utapau', 22200000, 2);
+
+-- Galaktyka
+INSERT INTO Galaktyka (ID, NAZWA)
+VALUES
+  (1, 'Zewnetrzne Rubieze'),
+  (2, 'Nieznane Teretoria');
+
+-- Jedi misja
+INSERT INTO Jedi_Misja (MISJA_ID, JEDI_IMIE)
+VALUES
+    (9, 'Obi-Wan'),
+    (8, 'Anakin'),
+    (7, 'Anakin'),
+    (6, 'Luminara'),
+    (5, 'Mace'),
+    (4, 'Aayla'),
+    (3, 'Obi-Wan'),
+    (2, 'Plo');
+
+-- Legion misja
+INSERT INTO Legion_Misja (KLON_LEGION_ID, STRATY_LEGIONU, MISJA_ID)
+VALUES
+    (212, 1000, 9),
+    (501, 1423, 8),
+    (501, 3985, 7),
+    (41, 1768, 6),
+    (187, 1024, 5),
+    (327, 2000, 4),
+    (212, 4123, 3),
+    (104, 300, 2);
+
+-- Lista Padawanow (dodatkowe wpisy)
+INSERT INTO LISTA_PADAWANOW (mistrz, padawan, padawan_od, padawan_do)
+VALUES
+  ('Yoda', 'Mace', '1950-06-05', '1965-06-05'),
+  ('Yoda', 'Ki-Adi', '1966-06-05', '1976-06-05');
+
+
+
+select * from Klon
+select * from Jedi
+--PROCEDURY
+
+CREATE PROCEDURE DodajKlona @PSEUDONIM VARCHAR(30), @LEGION_ID INT
+AS
+BEGIN
+    IF @LEGION_ID NOT IN (SELECT ID FROM Klon_Legion)
+    BEGIN
+        RAISERROR('TAKI LEGION NIE ISTNIEJE',1,1)
+        ROLLBACK
+    end
+    ELSE BEGIN
+        INSERT INTO Klon VALUES ((SELECT MAX(ID)+1 FROM Klon),@PSEUDONIM,
+                                 'N','Porucznik',@LEGION_ID)
+    end
+
+end
+
+ALTER PROCEDURE PRZENIES_KLONA_DO_INNEGO_LEGIONU @ID_KLONA INT, @NOWY_LEGION_ID INT
+
+AS
+    DECLARE @STARY_LEGION_ID INT
+    DECLARE @PSEUDONIM VARCHAR(21) = (SELECT ISNULL(pseudonim, 'Brak pseudonimu')
+                    FROM Klon WHERE id = @ID_KLONA)
+
+    BEGIN
+
+        SELECT @STARY_LEGION_ID = Klon_Legion_id
+        FROM Klon
+        WHERE id = @ID_KLONA
+
+        IF @ID_KLONA NOT IN (SELECT ID FROM KLON)
+        BEGIN
+            RAISERROR ('KLONA O TAKIM ID NIE MA W BAZIE',1,1)
+            ROLLBACK
+        END
+        ELSE
+        BEGIN
+            IF @NOWY_LEGION_ID NOT IN (SELECT ID FROM Klon_Legion)
+                BEGIN
+                    RAISERROR ('LEGION O TAKIM ID NIE ISTNIEJE',1,1)
+                    ROLLBACK
+                END
+            ELSE
+                BEGIN
+                    UPDATE Klon
+                    SET Klon_Legion_id = @NOWY_LEGION_ID
+                    WHERE id = @ID_KLONA
+
+                    PRINT ('KLON O ID ' + CAST(@ID_KLONA AS NVARCHAR(10)) + ' I PSEUDONIMIE: ' +
+                        @PSEUDONIM +
+                        ' ZOSTAL PRZENIESIONY Z LEGIONU ' +
+                        CAST(@STARY_LEGION_ID AS NVARCHAR(10)) +
+                        ' DO LEGIONU: '+
+                        CAST(@NOWY_LEGION_ID AS NVARCHAR(10)))
+                    END
+        END
+    END
+
+select * from Klon
+EXEC PRZENIES_KLONA_DO_INNEGO_LEGIONU 34,501
+
+SELECT * FROM Jedi
+
+CREATE TRIGGER LICZEBOSC_RADY
+ON Jedi
+AFTER INSERT
+AS
+BEGIN
+        DECLARE @ILOSC_CZLONKOW_RADY INT = (SELECT COUNT(*) FROM Jedi WHERE rada = 'T')
+        IF EXISTS(SELECT 1 FROM inserted WHERE @ILOSC_CZLONKOW_RADY>=12 AND rada = 'T')
+        BEGIN
+            RAISERROR ('NIE MA WOLNYCH MIEJSC W RADZIE JEDI',1,1)
+            ROLLBACK
+        end
+
+end
+INSERT INTO JEDI VALUES ('JACEK','SASIN','RYCERZ','N')
+SELECT * FROM Jedi
+
+CREATE TRIGGER AktualizujDateZakonczeniaTreningu
+ON Jedi
+AFTER UPDATE
+AS
+  BEGIN
+        IF EXISTS(SELECT 1 FROM inserted, deleted WHERE deleted.ranga = 'Padawan' and inserted.ranga = 'Rycerz Jedi')
+            BEGIN
+                UPDATE lp
+                SET padawan_do = GETDATE()
+                FROM Lista_Padawanow lp
+                JOIN inserted i ON lp.Padawan = i.imie
+                WHERE Padawan = i.imie
+            end
+
+    END;
+
+
+DROP TRIGGER AktualizujDateZakonczeniaTreningu
+
+
+
+UPDATE Jedi
+SET ranga = 'Wielki Mistrz Jedi'
+WHERE imie = 'Cal' OR imie = 'Ahsoka';
+
+UPDATE Jedi
+SET ranga = 'Mistrz jedi'
+WHERE imie = 'Baris';
+
+
+SELECT * FROM Lista_Padawanow;
+SELECT * FROM Jedi
+
+
+-- CREATE PROCEDURE DODAJ_CZLONKA_RADY @IMIE VARCHAR(30), @NAZWISKO VARCHAR(30)
+-- AS
+--     BEGIN
+--         INSERT INTO Jedi VALUES (@IMIE,@NAZWISKO,'Mistrz Jedi','T')
+--     end
+--
+-- CREATE PROCEDURE DODAJ_NIE_CZLONKA_RADY @IMIE VARCHAR(30), @NAZWISKO VARCHAR(30),@RANGA VARCHAR(30)
+-- AS
+--     BEGIN
+--         INSERT INTO Jedi VALUES (@IMIE,@NAZWISKO,@RANGA,'N')
+--     end
+--
+-- EXEC DODAJ_NIE_CZLONKA_RADY 'NATAR','VEBB','RYCERZ'
+
+
+SELECT * FROM JEDI
